@@ -36,6 +36,7 @@ public:
     void clean(void); // to print the path of clean
     void set_BFS(void);
     void print_BFS(void);
+    void print_neighbor(void);
 };
 
 
@@ -44,7 +45,7 @@ graph:: graph(void)
     //fstream fin;
 
     //fin.open("floor.data", ios::in);
-    cin >> col >> row >> battery;
+    cin >> row >> col >> battery;
 
     num_node = col * row;
     array = new node[num_node];
@@ -78,9 +79,9 @@ graph:: graph(void)
                 array[i].neighbor[left] = i + 1;
             else {
                 if (array[i - col].type != 1) 
-                    array[i].neighbor[up] = i - row;
+                    array[i].neighbor[up] = i - col;
                 if (array[i + col].type != 1)
-                    array[i].neighbor[down] = i + row;
+                    array[i].neighbor[down] = i + col;
                 if (array[i - 1].type != 1)
                     array[i].neighbor[left] = i - 1;
                 if (array[i + 1].type != 1)
@@ -142,10 +143,24 @@ void graph:: print_BFS(void)
         }
     }
 }
+
+void graph:: print_neighbor(void)
+{
+    
+    for (int i = 0; i < num_node; i++) {
+        if (array[i].type != 1)
+            cout << i << endl;
+        for (int j = 0; j < 4; j++)
+            if (array[i].type != 1) {
+             cout << array[i].neighbor[j] << ' ';
+            }
+        if (array[i].type != 1)  cout << endl;
+    }
+}
 int main(void)
 {
     graph mygraph;
     mygraph.print_BFS();
-
+    mygraph.print_neighbor();
     return 0;
 }
