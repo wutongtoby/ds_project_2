@@ -70,9 +70,9 @@ graph:: graph(void)
     for (int i = 0; i < num_node; i++) {
         if (array[i].type != 1) {
             if (i / col == 0) // R is at the top of the graph
-                array[i].neighbor[down] = i + row;
+                array[i].neighbor[down] = i + col;
             else if (i / col == row - 1) // R is at the bottom of the graph
-                array[i].neighbor[up] = i - row;
+                array[i].neighbor[up] = i - col;
             else if (i % col == 0) // R is at the left wall
                 array[i].neighbor[right] = i - 1;
             else if (i % col == col - 1) // R is at the right wall
