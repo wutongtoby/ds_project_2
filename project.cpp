@@ -4,7 +4,6 @@
 using namespace std;
 
 class graph;
-class BFS;
 
 enum {up = 0, down = 1, left = 2, right = 3};
 
@@ -18,27 +17,20 @@ private:
 };
 
 class graph{
-friend BFS;
 private:
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
     int R_position; // the position of the recharge station
     int battery; // the volume of battery
     node* array; // the two-dimensional array to represent the graph
-    BFS bsf; // the bsf tree of the graph
-public:
-    graph(void); // constructor
-    void clean(void); // to print the path of clean
-};
-
-class BFS {
-friend graph;
-private:
     int *predecessor;
     int *distance;
 public:
-    void set_BSF(int);
+    graph(void); // constructor
+    void clean(void); // to print the path of clean
+    void set_BFS(void);
 };
+
 
 graph:: graph(void) 
 {
@@ -46,8 +38,11 @@ graph:: graph(void)
 
     fin.open("floor.data", ios::in);
     fin >> col >> row >> battery;
+
     num_node = col * row;
     array = new node[num_node];
+    predecessor = new int[num_node];
+    distance = new int[num_node];
 
     for (int i = 0; i < num_node; i++) {
         fin >> array[i].type;
@@ -85,7 +80,12 @@ graph:: graph(void)
             }
         }
     }
-    bsf.set_BSF(); // run the BSF on the graph
+    set_BFS(); // run the BSF on the graph
+}
+
+void graph::set_BFS(void)
+{
+
 }
 int main(void)
 {
