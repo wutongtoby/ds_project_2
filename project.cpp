@@ -108,28 +108,24 @@ void graph::set_BFS(void)
     
     queue<int> q;
     int i = R_position;
-    for (int j = 0; j < num_node; j++) {
-        if (colour[i] == white) {
-            colour[i] = grey;
-            distance[i] = 0;
-            predecessor[i] = -1;
-            q.push(i);
-            while (!q.empty()) {
-                int u = q.front();
-                for (int k = 0; k < 4; k++) {
-                    int current_pos = array[u].neighbor[k];
-                    if (colour[current_pos] == white) {
-                        colour[current_pos] = grey;
-                        distance[current_pos] = distance[u] + 1;
-                        predecessor[current_pos] = u;
-                        q.push(current_pos);
-                    }
-                }
-                q.pop();
-                colour[u] = black;
+    
+    colour[i] = grey;
+    distance[i] = 0;
+    predecessor[i] = -1;
+    q.push(i);
+    while (!q.empty()) {
+        int u = q.front();
+        for (int k = 0; k < 4; k++) {
+            int current_pos = array[u].neighbor[k];
+            if (colour[current_pos] == white) {
+                colour[current_pos] = grey;
+                distance[current_pos] = distance[u] + 1;
+                predecessor[current_pos] = u;
+                q.push(current_pos);
             }
         }
-        i = j;
+        q.pop();
+        colour[u] = black;
     }
     delete [] colour;
 }
