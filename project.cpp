@@ -75,7 +75,7 @@ public:
     void heap_set(void);
     void heap_print(void) {
         for (int i = 1; i <= heapsize; i++) {
-            cout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
+            fout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
         }
     }
     int furthest_neighbor(int);
@@ -86,7 +86,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("aaa.data", ios::in);
+    fin.open("floor.data", ios::in);
     fin >> row >> col >> battery;
     
     num_node = col * row;
@@ -191,8 +191,8 @@ void graph:: print_BFS(void)
 {
     for (int i = 0; i < num_node; i++) {
         if (array[i].type != '1') {
-            cout << i << "th vertex has distance "<< distance[i];
-            cout << ", and it's predecessor is " << predecessor[i] << endl;
+            fout << i << "th vertex has distance "<< distance[i];
+            fout << ", and it's predecessor is " << predecessor[i] << endl;
         }
     }
 }
@@ -202,12 +202,12 @@ void graph:: print_neighbor(void)
     
     for (int i = 0; i < num_node; i++) {
         if (array[i].type != '1')
-            cout << i << endl;
+            fout << i << endl;
         for (int j = 0; j < 4; j++)
             if (array[i].type != '1') {
-             cout << array[i].neighbor[j] << ' ';
+             fout << array[i].neighbor[j] << ' ';
             }
-        if (array[i].type != '1')  cout << endl;
+        if (array[i].type != '1')  fout << endl;
     }
 }
 
@@ -303,39 +303,39 @@ void graph:: clean(void)
     while (!heap_IsEmpty()) {
         current_battery = battery; // charge
         target = heap_top(); // get the index of the furthest node
-        cout << R_position << endl;
-        cout << "there are still " << current_battery << " of battery" << endl;
-        //cout << "target is " << target << " and distance is " << distance[target] << endl;
+        fout << R_position << endl;
+        fout << "there are still " << current_battery << " of battery" << endl;
+        //fout << "target is " << target << " and distance is " << distance[target] << endl;
         for (int i = 0, parent = target; i < distance[target]; i++) {
             s.push(parent);
             array[parent].Is_clean = 1;
             parent = predecessor[parent];
         }
         while (!s.empty()) {
-            cout << s.top() << endl;
+            fout << s.top() << endl;
             current_battery--;
-            cout << "there are still " << current_battery << " of battery" << endl;
+            fout << "there are still " << current_battery << " of battery" << endl;
             s.pop();
         }
-        cout << "reacing target, the current battery is " << current_battery << endl;
+        fout << "reacing target, the current battery is " << current_battery << endl;
 
         
         while (current_battery > distance[target] && !heap_IsEmpty()) {
             heap_clean();
             target = furthest_neighbor(target);
             if (target == R_position) break; // occasioncally go to home
-            cout << target << endl;
+            fout << target << endl;
             --current_battery;
-            cout << "there are still " << current_battery << " of battery" << endl;
+            fout << "there are still " << current_battery << " of battery" << endl;
             array[target].Is_clean = 1;
         }
 
         for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
             array[parent].Is_clean = 1;
-            cout << parent << endl;
+            fout << parent << endl;
             parent = predecessor[parent];
             --current_battery;
-            cout << "there are still " << current_battery << " of battery" << endl;
+            fout << "there are still " << current_battery << " of battery" << endl;
         }
         heap_clean();
     }
@@ -351,11 +351,11 @@ int main(void)
     fout.close();
     /*
     mygraph.heap_print();
-    cout << endl;
+    fout << endl;
     mygraph.heap_pop();
 
     mygraph.heap_print();
-    cout << endl;
+    fout << endl;
     mygraph.heap_pop();
     
     */
