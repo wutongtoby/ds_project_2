@@ -3,6 +3,22 @@ class graph;
 
 enum {white, grey, black};
 
+class min_heap {
+friend graph;
+public:
+    min_heap(void);
+    ~min_heap(void);
+    bool IsEmpty(void) const;
+    int top(void) const;
+    void push(const int&);
+    void pop(void);
+    void set_heap(int distance[], int);
+private:
+    int *heap;
+    int heapSize;
+    int capacity;
+};
+
 class node {
 friend graph;
 private:
