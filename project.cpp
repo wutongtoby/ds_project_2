@@ -76,6 +76,7 @@ public:
             cout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
         }
     }
+    int furthest_neighbor(int);
 };
 
 graph:: graph(void)
@@ -260,22 +261,48 @@ void graph::heap_clean(void)
         heap_pop();
     }
 }
+
+int graph::furthest_neighbor(int x) 
+{
+    int furthest = 0;
+    int furthest_distance = 0;
+
+    // find the most dirty and furthest first, if can't find any, then go to the furthest
+    for (int i = 0; i < 4; i++) {
+        if (array[x].neighbor[i] != -1 &&
+            array[array[x].neighbor[i]].Is_clean == 0 && 
+            furthest_distance < distance[array[x].neighbor[i]]) {
+            furthest = array[x].neighbor[i];
+            furthest_distance = distance[furthest];
+        }
+    }
+    if (furthest == 0) {
+        for (int i = 0; i < 4; i++) {
+            if (array[x].neighbor[i] != -1 &&
+                furthest_distance < distance[array[x].neighbor[i]]) {
+                furthest = array[x].neighbor[i];
+                furthest_distance = distance[furthest];
+            }
+        }
+        return furthest;                
+    }
+    return furthest;
+}
+
 void graph:: clean(void)
 {
     int target;
     int parent;
     stack<int> s;
     int current_battery;
-    int furthest_neighbor;
 
     array[R_position].Is_clean = 1;
     
     while (!heap_IsEmpty()) {
-        cout << R_position << endl;
         current_battery = battery; // charge
         target = heap_top(); // get the index of the furthest node
         cout << "target is " << target << " and distance is " << distance[target] << endl;
-        for (int i = 0, parent = target; i < distance[target]; i++) {
+        for (int i = 0, parent = target; i <= distance[target]; i++) {
             s.push(parent);
             array[parent].Is_clean = 1;
             parent = predecessor[parent];
@@ -283,11 +310,27 @@ void graph:: clean(void)
         while (!s.empty()) {
             cout << s.top() << endl;
             current_battery--;
+            cout << "there are still " << current_battery << " of battery" << endl;
             s.pop();
         }
+
         cout << "reacing target, the current battery is " << current_battery << endl;
         while (current_battery > distance[target]) {
-            
+            target = furthest_neighbor(target);
+            cout << "XXXX" <<target <<"XXXX" <<endl;
+            if (target == R_position) break; // occasioncally go to home
+            cout << target << endl;
+            --current_battery;
+            cout << "there are still " << current_battery << " of battery" << endl;
+            array[target].Is_clean = 1;
+        }
+
+        for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
+            array[parent].Is_clean = 1;
+            cout << parent << endl;
+            parent = predecessor[parent];
+            --current_battery;
+            cout << "there are still " << current_battery << " of battery" << endl;
         }
         heap_clean();
     }
