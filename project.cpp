@@ -10,6 +10,8 @@
 #define right 3
 using namespace std;
 
+fstream fout;
+
 class graph;
 enum {white, grey, black};
 
@@ -84,7 +86,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("floor.data", ios::in);
+    fin.open("aaa.data", ios::in);
     fin >> row >> col >> battery;
     
     num_node = col * row;
@@ -301,8 +303,10 @@ void graph:: clean(void)
     while (!heap_IsEmpty()) {
         current_battery = battery; // charge
         target = heap_top(); // get the index of the furthest node
-        cout << "target is " << target << " and distance is " << distance[target] << endl;
-        for (int i = 0, parent = target; i <= distance[target]; i++) {
+        cout << R_position << endl;
+        cout << "there are still " << current_battery << " of battery" << endl;
+        //cout << "target is " << target << " and distance is " << distance[target] << endl;
+        for (int i = 0, parent = target; i < distance[target]; i++) {
             s.push(parent);
             array[parent].Is_clean = 1;
             parent = predecessor[parent];
@@ -313,11 +317,12 @@ void graph:: clean(void)
             cout << "there are still " << current_battery << " of battery" << endl;
             s.pop();
         }
-
         cout << "reacing target, the current battery is " << current_battery << endl;
-        while (current_battery > distance[target]) {
+
+        
+        while (current_battery > distance[target] && !heap_IsEmpty()) {
+            heap_clean();
             target = furthest_neighbor(target);
-            cout << "XXXX" <<target <<"XXXX" <<endl;
             if (target == R_position) break; // occasioncally go to home
             cout << target << endl;
             --current_battery;
@@ -338,11 +343,12 @@ void graph:: clean(void)
 int main(void)
 {
     graph mygraph;
+    fout.open("output.path", ios::out);
     //mygraph.heap_print();
     //mygraph.print_BFS();
     //mygraph.print_neighbor();
     mygraph.clean();
-    
+    fout.close();
     /*
     mygraph.heap_print();
     cout << endl;
