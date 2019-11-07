@@ -12,6 +12,7 @@ using namespace std;
 
 class graph;
 enum {white, grey, black};
+
 namespace mynamespace {
 class pair {
     public:
@@ -48,6 +49,11 @@ public:
     void push(const mynamespace::pair&);
     void pop(void);
     void set_heap(int distance[], int);
+    void print_heap(void) {
+        for (int i = 0; i < heapsize; i++) {
+            cout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
+        }
+    }
 private:
     mynamespace::pair* heap;
     int heapsize;
@@ -64,6 +70,7 @@ private:
 };
 
 class graph {
+friend max_heap;
 private:
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
@@ -72,15 +79,14 @@ private:
     node* array; // the two-dimensional array to represent the graph
     int *predecessor; // the predecessor array as a result of BFS
     int *distance; // the closest distance from any node to the R
-    max_heap graph_heap;
 public:
     graph(void); // constructor
     void clean(void); // to print the path of clean
     void set_BFS(void);
     void print_BFS(void);
     void print_neighbor(void);
-    int getFurthest(void);
     void clean_graph_heap(void);
+    max_heap graph_heap;
 };
 
 graph:: graph(void)
@@ -209,15 +215,14 @@ void graph:: print_neighbor(void)
     }
 }
 
-int graph::getFurthest(void)
-{
-    return graph_heap.top();
-}
 
 void max_heap:: set_heap(int distance[], int num_node) {
     heap = new mynamespace::pair[num_node + 1];
+    mynamespace::pair temp;
+
     for (int i = 0; i < num_node; i++) {
-    	mynamespace::pair temp = mynamespace::pair(i, distance[i]);
+        if ()
+    	temp = mynamespace::pair(i, distance[i]);
 		push(temp); // push the distance of i and i
 	}
         
@@ -226,7 +231,7 @@ void max_heap:: set_heap(int distance[], int num_node) {
 void max_heap::push(const mynamespace::pair& e)
 {
     int currentNode = ++heapsize;
-    while (currentNode != 1 && heap[currentNode / 2] < e) {
+    while (currentNode != 1 && heap[currentNode / 2] > e) {
         heap[currentNode] = heap[currentNode / 2];
         currentNode /= 2;
     }
@@ -236,17 +241,18 @@ void max_heap::push(const mynamespace::pair& e)
 void max_heap:: pop(void)
 {
     if (IsEmpty()) return;
-    // rempde the last element form heap
+    heap[1].y = 0;
+    // remove the last element from heap
     mynamespace::pair lastE = heap[heapsize--];
 
     // tickle down
     int currentNode = 1; // root
-    int child = 2; // a chhild of currentNode
+    int child = 2; // a child of currentNode
     while (child < heapsize) {
-        // set child to larger child of currentNode
+        // set child to smaller child of currentNode
         if (child < heapsize && heap[child] < heap[child + 1]) child++;
         // can we put last in currentNode?
-        if (lastE >= heap[child]) break; // Yes!!
+        if (lastE <= heap[child]) break; // Yes!!
 
         // No!
         heap[currentNode] = heap[child]; // move child up
@@ -257,7 +263,7 @@ void max_heap:: pop(void)
 
 void graph:: clean_graph_heap(void)
 {
-    while (array[graph_heap.top()].Is_clean == 0)
+    while (array[graph_heap.top()].Is_clean)
         graph_heap.pop();
 }
 void graph:: clean(void)
@@ -267,17 +273,18 @@ void graph:: clean(void)
     stack<int> s;
 
     array[R_position].Is_clean = 1;
+    cout << R_position << endl;
 
     while (!graph_heap.IsEmpty()) {
-        target = getFurthest(); // get the index of the furthest node
+        target = graph_heap.top(); // get the index of the furthest node
+        cout << "target is " << target << " and distance is " << distance[target] << endl;
         for (int i = 0, parent = target; i < distance[target]; i++) {
             s.push(parent);
             array[parent].Is_clean = 1;
             parent = predecessor[parent];
         }
-        cout << R_position << endl;
         while (!s.empty()) {
-            cout << s.top();
+            cout << s.top() << endl;
             s.pop();
         }
         clean_graph_heap();   
@@ -286,8 +293,9 @@ void graph:: clean(void)
 int main(void)
 {
     graph mygraph;
+    mygraph.graph_heap.print_heap();
     //mygraph.print_BFS();
     //mygraph.print_neighbor();
-    mygraph.clean();
+    //mygraph.clean();
     return 0;
 }
