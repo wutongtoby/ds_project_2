@@ -16,13 +16,13 @@ enum {white, grey, black};
 class node {
 friend graph;
 private:
-    int type; // 1 or 0 or R
+    char type; // 1 or 0 or R
     int position; // the position of node
     int neighbor[4]; // from 0 to 3 are up down left right
     bool Is_clean; // 1 is clean, 0 is dirty
 };
 
-class graph{
+class graph {
 private:
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
@@ -42,20 +42,28 @@ public:
 
 graph:: graph(void) 
 {
-    //fstream fin;
-
-    //fin.open("floor.data", ios::in);
-    cin >> row >> col >> battery;
-
+    fstream fin;
+    char **temp, *temp1;
+    
+    fin.open("floor.data", ios::in);
+    fin >> row >> col >> battery;
+    
     num_node = col * row;
+    
+    temp1 = new char[num_node + 1];
+    temp = new char*[row];
+    for (int i = 0; i < row; i++) {
+        temp[i] = temp1 + i * col;
+        fin >> temp[i];
+    }
+    
     array = new node[num_node];
     predecessor = new int[num_node];
     distance = new int[num_node];
 
-
     for (int i = 0; i < num_node; i++) {
-        cin >> array[i].type;
-        if (array[i].type == 3) {
+        array[i].type = temp[i / col][i % col];
+        if (array[i].type == 'R') {
             R_position = i;
         }
         array[i].position = i;
@@ -65,10 +73,13 @@ graph:: graph(void)
         array[i].neighbor[left] = -1;
         array[i].neighbor[right] = -1;
     }
-    //fin.close();
+    fin.close();
+    delete [] temp1;
+    delete [] temp;
+    
     // set the neighbor data
     for (int i = 0; i < num_node; i++) {
-        if (array[i].type != 1) {
+        if (array[i].type != '1') {
             if (i / col == 0) // R is at the top of the graph
                 array[i].neighbor[down] = i + col;
             else if (i / col == row - 1) // R is at the bottom of the graph
@@ -78,18 +89,18 @@ graph:: graph(void)
             else if (i % col == col - 1) // R is at the right wall
                 array[i].neighbor[left] = i + 1;
             else {
-                if (array[i - col].type != 1) 
+                if (array[i - col].type != '1') 
                     array[i].neighbor[up] = i - col;
-                if (array[i + col].type != 1)
+                if (array[i + col].type != '1')
                     array[i].neighbor[down] = i + col;
-                if (array[i - 1].type != 1)
+                if (array[i - 1].type != '1')
                     array[i].neighbor[left] = i - 1;
-                if (array[i + 1].type != 1)
+                if (array[i + 1].type != '1')
                     array[i].neighbor[right] = i + 1;
             }
         }
     }
-  
+ 
     set_BFS(); // run the BSF on the graph
 }
 
@@ -98,21 +109,22 @@ void graph::set_BFS(void)
     int *colour = new int[num_node];
     
     for (int i = 0; i < num_node; i++) {
-        if (array[i].type != 1)
+        if (array[i].type != '1')
             colour[i] = white;
         else
             colour[i] = black;
         predecessor[i] = -1;
         distance[i] = col + row - 2;
     }
-    
+     
     queue<int> q;
     int i = R_position;
-    
+ 
     colour[i] = grey;
     distance[i] = 0;
     predecessor[i] = -1;
     q.push(i);
+    
     while (!q.empty()) {
         int u = q.front();
         for (int k = 0; k < 4; k++) {
@@ -133,8 +145,8 @@ void graph::set_BFS(void)
 void graph:: print_BFS(void) 
 {
     for (int i = 0; i < num_node; i++) {
-        if (array[i].type != 1) {
-            cout << i << "th vertex has distance "<<distance[i];
+        if (array[i].type != '1') {
+            cout << i << "th vertex has distance "<< distance[i];
             cout << ", and it's predecessor is " << predecessor[i] << endl;
         }
     }
@@ -144,19 +156,22 @@ void graph:: print_neighbor(void)
 {
     
     for (int i = 0; i < num_node; i++) {
-        if (array[i].type != 1)
+        if (array[i].type != '1')
             cout << i << endl;
         for (int j = 0; j < 4; j++)
-            if (array[i].type != 1) {
+            if (array[i].type != '1') {
              cout << array[i].neighbor[j] << ' ';
             }
-        if (array[i].type != 1)  cout << endl;
+        if (array[i].type != '1')  cout << endl;
     }
 }
 int main(void)
 {
+    
     graph mygraph;
+    
     mygraph.print_BFS();
+    
     mygraph.print_neighbor();
     return 0;
 }
