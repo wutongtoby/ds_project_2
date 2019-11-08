@@ -99,7 +99,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("aaa.data", ios::in);
+    fin.open("floor.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
@@ -312,7 +312,7 @@ void graph:: clean(void)
     int parent;
     Stack s;
     int energy;
-
+    int foo, more;
     array[R_position].Is_clean = 1;
     
     while (!heap_IsEmpty()) {
@@ -335,23 +335,32 @@ void graph:: clean(void)
             s.pop();
         }
         
+        more = foo = 0;
         while (energy > distance[target] && !heap_IsEmpty()) {
             heap_clean();
             target = furthest_neighbor(target);
+        
             if (target == R_position) break; // occasioncally go to home
             fout << target / col <<' '<< target % col <<'\n';
             --energy;
             ++step;
-            if (array[target].Is_clean == 1)
+            ++more;
+            if (array[target].Is_clean == 1) {
                 ++repeat;
+                ++foo;
+            }
             array[target].Is_clean = 1;
+            
+            // avoid to make circle
+            if (more > num_node / 16  && (float)foo / more > 0.6)
+                break;
         }
 
         for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
             if (array[parent].Is_clean == 1)
                 ++repeat;
             array[parent].Is_clean = 1;
-            fout << parent / col<< ' '<<parent % col << '\n';
+            fout << parent / col<< ' ' << parent % col << '\n';
             parent = predecessor[parent];
             --energy;
             ++step;
