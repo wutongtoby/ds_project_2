@@ -3,6 +3,7 @@
 #include <queue>
 #include <stdio.h>
 #include <stack>
+#include <time.h>
 
 #define up 0
 #define down 1
@@ -59,6 +60,7 @@ private:
     int capacity;
 public:
     graph(void); // constructor
+    ~graph(void);
     void clean(void); // to print the path of clean
     void set_BFS(void);
     void print_BFS(void);
@@ -81,12 +83,20 @@ public:
     int furthest_neighbor(int);
 };
 
+graph:: ~graph(void)
+{
+    delete[] array;
+    delete[] predecessor;
+    delete[] distance;
+    delete[] heap;
+}
+
 graph:: graph(void)
 {
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("floor.data", ios::in);
+    fin.open("aaa.data", ios::in);
     fin >> row >> col >> battery;
     
     num_node = col * row;
@@ -342,22 +352,19 @@ void graph:: clean(void)
 }
 int main(void)
 {
+    clock_t begin = clock();
     graph mygraph;
-    fout.open("output.path", ios::out);
-    //mygraph.heap_print();
-    //mygraph.print_BFS();
-    //mygraph.print_neighbor();
-    mygraph.clean();
-    fout.close();
-    /*
-    mygraph.heap_print();
-    fout << endl;
-    mygraph.heap_pop();
 
+    fout.open("output.path", ios::out);
     mygraph.heap_print();
     fout << endl;
-    mygraph.heap_pop();
+    //mygraph.print_BFS();
+    fout << endl;
+    //mygraph.print_neighbor();
+    fout << endl;
+    //mygraph.clean();
+    fout.close();
+    cout << (double)(clock() - begin) / CLOCKS_PER_SEC << endl;
     
-    */
     return 0;
 }
