@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include <queue>
-#include <stdio.h>
-#include <stack>
 #include <time.h>
+#include "stack.h"
+#include "queue.h"
+
 
 #define up 0
 #define down 1
@@ -16,26 +16,26 @@ fstream fout;
 class graph;
 enum {white, grey, black};
 
-namespace mynamespace {
-class pair {
+
+class Pair {
     public:
         int x; // index
         int y; // distance
-        pair(int a = 0, int b = 0): x(a), y(b) {}
-        bool operator>(const pair &c) {
+        Pair(int a = 0, int b = 0): x(a), y(b) {}
+        bool operator>(const Pair &c) {
         return (y > c.y); 
         }
-        bool operator<(const pair &c) {
+        bool operator<(const Pair &c) {
             return (y < c.y);
         }
-        bool operator>=(const pair &c) {
+        bool operator>=(const Pair &c) {
             return (y >= c.y);
         }
-        bool operator<=(const pair &c) {
+        bool operator<=(const Pair &c) {
             return (y <= c.y);
         }
     };
-}
+
 
 class node {
 friend graph;
@@ -56,7 +56,7 @@ private:
     node* array; // the two-dimensional array to represent the graph
     int *predecessor; // the predecessor array as a result of BFS
     int *distance; // the closest distance from any node to the R
-    mynamespace::pair* heap;
+    Pair* heap;
     int heapsize;
     int capacity;
     int step;
@@ -74,7 +74,7 @@ public:
     int heap_top(void) {
         return heap[1].x;
     }
-    void heap_push(const mynamespace::pair&);
+    void heap_push(const Pair&);
     void heap_pop(void);
     void heap_set(void);
     void heap_print(void) {
@@ -177,7 +177,7 @@ void graph::set_BFS(void)
         distance[i] = col + row - 2;
     }
      
-    queue<int> q;
+    queue q;
     int i = R_position;
  
     colour[i] = grey;
@@ -228,18 +228,18 @@ void graph:: print_neighbor(void)
 
 
 void graph::heap_set(void) {
-    heap = new mynamespace::pair[num_node + 1];
-    mynamespace::pair temp;
+    heap = new Pair[num_node + 1];
+    Pair temp;
 
     for (int i = 0; i < num_node; i++) {
         if (array[i].type != '1') {
-    	    temp = mynamespace::pair(i, distance[i]);
+    	    temp = Pair(i, distance[i]);
 		    heap_push(temp); // push the distance of i and i
         }
     }   
 }
 
-void graph::heap_push(const mynamespace::pair& e)
+void graph::heap_push(const Pair& e)
 {
     int currentNode = ++heapsize;
     while (currentNode != 1 && heap[currentNode / 2] < e) {
@@ -254,7 +254,7 @@ void graph:: heap_pop(void)
     if (heap_IsEmpty()) return;
     heap[1].y = 0;
     // remove the last element from heap
-    mynamespace::pair lastE = heap[heapsize--];
+    Pair lastE = heap[heapsize--];
 
     // tickle down
     int currentNode = 1; // root
@@ -310,7 +310,7 @@ void graph:: clean(void)
 {
     int target;
     int parent;
-    stack<int> s;
+    Stack s;
     int energy;
 
     array[R_position].Is_clean = 1;
@@ -330,8 +330,8 @@ void graph:: clean(void)
         step += distance[target];
         energy -= distance[target];
 
-        while (!s.empty()) {
-            fout << s.top() / col<<' ' <<s.top() % col <<'\n';
+        while (!s.IsEmpty()) {
+            fout << s.front() / col<<' ' <<s.front() % col <<'\n';
             s.pop();
         }
         
@@ -370,6 +370,7 @@ void graph::check_clean(void)
         }
     fout << "Success" << endl;
 }
+
 int main(void)
 {
     clock_t begin = clock();
