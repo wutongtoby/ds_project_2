@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stack>
 #include <time.h>
-#include <algorithm>
 
 #define up 0
 #define down 1
@@ -14,20 +13,32 @@ using namespace std;
 
 fstream fout;
 
-class list;
 class graph;
 enum {white, grey, black};
 
-struct Pair {
+namespace mynamespace {
+class pair {
+    public:
         int x; // index
         int y; // distance
-        Pair(int a = 0, int b = 0): x(a), y(b) {}
-};
-bool compare(const Pair& a,const Pair& b)  {return (a.y > b.y);}
+        pair(int a = 0, int b = 0): x(a), y(b) {}
+        bool operator>(const pair &c) {
+        return (y > c.y); 
+        }
+        bool operator<(const pair &c) {
+            return (y < c.y);
+        }
+        bool operator>=(const pair &c) {
+            return (y >= c.y);
+        }
+        bool operator<=(const pair &c) {
+            return (y <= c.y);
+        }
+    };
+}
 
 class node {
 friend graph;
-friend list;
 private:
     char type; // 1 or 0 or R
     int position; // the position of node
@@ -35,26 +46,9 @@ private:
     bool Is_clean; // 1 is clean, 0 is dirty
 };
 
-class list {
-private:
-    Pair* clean_list;
-    int length;
-    int current;
-public:
-    ~list(void);
-    void set(int, int*);
-    bool Isempty(void);
-    int top(void);
-    void update(node*);
-    void print(void) {
-        for (int i = 0; i < length; i++)
-            cout << "index "<<clean_list[i].x << " distance" << clean_list[i].y << endl;
-    }
-};
-
 class graph {
-friend list;
 private:
+    int repeat;
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
     int R_position; // the position of the recharge station
@@ -62,7 +56,10 @@ private:
     node* array; // the two-dimensional array to represent the graph
     int *predecessor; // the predecessor array as a result of BFS
     int *distance; // the closest distance from any node to the R
-    list mylist;
+    mynamespace::pair* heap;
+    int heapsize;
+    int capacity;
+    int step;
 public:
     graph(void); // constructor
     ~graph(void);
@@ -70,121 +67,31 @@ public:
     void set_BFS(void);
     void print_BFS(void);
     void print_neighbor(void);
+    void heap_clean(void);
+    bool heap_IsEmpty(void) {
+        return (heapsize == 0);
+    }
+    int heap_top(void) {
+        return heap[1].x;
+    }
+    void heap_push(const mynamespace::pair&);
+    void heap_pop(void);
+    void heap_set(void);
+    void heap_print(void) {
+        for (int i = 1; i <= heapsize; i++) {
+            fout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
+        }
+    }
     int furthest_neighbor(const int&);
     void check_clean(void);
-    void set_list(void);
 };
-
-void graph:: clean(void)
-{
-    int target;
-    int parent;
-    int step = 0, repeat = 0;
-    stack<int> s;
-    int energy;
-
-    array[R_position].Is_clean = 1;
-    mylist.print();
-    
-    while (!mylist.Isempty()) {
-        energy = total_energy; // charge
-        mylist.update(array);
-        target = mylist.top(); // get the index of the furthest node
-        fout << R_position / col <<' ' <<R_position % col << '\n';
-        for (int i = 0, parent = target; i < distance[target]; i++) {
-            s.push(parent);
-            if (array[parent].Is_clean == 1)
-                ++repeat;
-            array[parent].Is_clean = 1;
-            parent = predecessor[parent];
-        }
-        step += distance[target];
-        energy -= distance[target];
-
-        while (!s.empty()) {
-            fout << s.top() / col<<' ' <<s.top() % col <<'\n';
-            s.pop();
-        }
-        
-        mylist.update(array);
-        while (energy > distance[target] && !mylist.Isempty()) {
-            target = furthest_neighbor(target);
-            if (target == R_position) break; // occasioncally go to home
-            fout << target / col <<' '<< target % col <<'\n';
-            --energy;
-            ++step;
-            if (array[target].Is_clean == 1)
-                ++repeat;
-            array[target].Is_clean = 1;
-            mylist.update(array);
-        }
-
-        for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
-            if (array[parent].Is_clean == 1)
-                ++repeat;
-            array[parent].Is_clean = 1;
-            fout << parent / col<< ' '<<parent % col << '\n';
-            parent = predecessor[parent];
-            --energy;
-            ++step;
-        }
-        mylist.update(array);
-    }
-    fout << "number of step is " << step << '\n';
-    fout << "number of repeated step is " << repeat << '\n';
-    fout << "And the percentage is " << (float) repeat / step << '\n';
-}
-list:: ~list(void)
-{
-    delete [] clean_list;
-}
-void list:: set(int num_node, int *distance)
-{
-    clean_list = new Pair[num_node];
-    length = num_node;
-    current = 0;
-
-    //for (int i = 0; i < length; i++)
-      //   cout << i << "QWQ"<< distance[i] << endl;
-
-    for (int i = 0; i < length; i++) {
-        if (distance[i] == -1) {
-             cout << distance[i] <<"DDDD" <<endl;
-            --length;
-            --i;
-        }
-        else {
-            clean_list[i] = Pair(i, distance[i]);
-            cout << distance[i] << ' '<< i << endl;
-        }
-    }
-
-    std::sort(clean_list, clean_list + num_node, compare);
-}
-
-
-bool list::Isempty(void)
-{
-    return (current == length);
-}
-
-int list::top(void)
-{
-    return clean_list[current].x;
-}
-
-void list::update(node* array)
-{
-    while(array[clean_list[current].x].Is_clean == 1 && current < length)
-        ++current;
-}
-
 
 graph:: ~graph(void)
 {
     delete[] array;
     delete[] predecessor;
     delete[] distance;
+    delete[] heap;
 }
 
 graph:: graph(void)
@@ -192,7 +99,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("floor.data", ios::in);
+    fin.open("aaa.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
@@ -248,28 +155,28 @@ graph:: graph(void)
         }
     }
     set_BFS();
-    set_list();
+
+    heap = NULL;
+    capacity = 0;
+    heapsize = 0;
+    step = 0;
+    repeat = 0;
+    heap_set();
 }
-void graph::set_list(void)
-{
-    mylist.set(num_node, distance);
-}
+
 void graph::set_BFS(void)
 {
     int *colour = new int[num_node];
     
     for (int i = 0; i < num_node; i++) {
-        if (array[i].type != '1') {
+        if (array[i].type != '1')
             colour[i] = white;
-            distance[i] = col + row - 2;
-        }
-        else {
+        else
             colour[i] = black;
-            distance[i] = -1;
-        }
         predecessor[i] = -1;
+        distance[i] = col + row - 2;
     }
-    
+     
     queue<int> q;
     int i = R_position;
  
@@ -319,6 +226,59 @@ void graph:: print_neighbor(void)
     }
 }
 
+
+void graph::heap_set(void) {
+    heap = new mynamespace::pair[num_node + 1];
+    mynamespace::pair temp;
+
+    for (int i = 0; i < num_node; i++) {
+        if (array[i].type != '1') {
+    	    temp = mynamespace::pair(i, distance[i]);
+		    heap_push(temp); // push the distance of i and i
+        }
+    }   
+}
+
+void graph::heap_push(const mynamespace::pair& e)
+{
+    int currentNode = ++heapsize;
+    while (currentNode != 1 && heap[currentNode / 2] < e) {
+        heap[currentNode] = heap[currentNode / 2];
+        currentNode /= 2;
+    }
+    heap[currentNode] = e;
+}
+
+void graph:: heap_pop(void)
+{
+    if (heap_IsEmpty()) return;
+    heap[1].y = 0;
+    // remove the last element from heap
+    mynamespace::pair lastE = heap[heapsize--];
+
+    // tickle down
+    int currentNode = 1; // root
+    int child = 2; // a child of currentNode
+    while (child <= heapsize) {
+        // set child to smaller child of currentNode
+        if (child < heapsize && heap[child] < heap[child + 1]) child++;
+        // can we put last in currentNode?
+        if (lastE >= heap[child]) break; // Yes!!
+
+        // No!
+        heap[currentNode] = heap[child]; // move child up
+        currentNode = child; child *= 2; // move down a level
+    }
+    heap[currentNode] = lastE;
+}
+
+void graph::heap_clean(void)
+{
+    while (array[heap_top()].Is_clean && !heap_IsEmpty()) {
+        heap_pop();
+    }
+}
+
 int graph::furthest_neighbor(const int &x) 
 {
     int furthest = 0;
@@ -346,14 +306,67 @@ int graph::furthest_neighbor(const int &x)
     return furthest;
 }
 
+void graph:: clean(void)
+{
+    int target;
+    int parent;
+    stack<int> s;
+    int energy;
 
+    array[R_position].Is_clean = 1;
+    
+    while (!heap_IsEmpty()) {
+        energy = total_energy; // charge
+        heap_clean();
+        target = heap_top(); // get the index of the furthest node
+        fout << R_position / col <<' ' <<R_position % col << '\n';
+        for (int i = 0, parent = target; i < distance[target]; i++) {
+            s.push(parent);
+            if (array[parent].Is_clean == 1)
+                ++repeat;
+            array[parent].Is_clean = 1;
+            parent = predecessor[parent];
+        }
+        step += distance[target];
+        energy -= distance[target];
+
+        while (!s.empty()) {
+            fout << s.top() / col<<' ' <<s.top() % col <<'\n';
+            s.pop();
+        }
+        
+        while (energy > distance[target] && !heap_IsEmpty()) {
+            heap_clean();
+            target = furthest_neighbor(target);
+            if (target == R_position) break; // occasioncally go to home
+            fout << target / col <<' '<< target % col <<'\n';
+            --energy;
+            ++step;
+            if (array[target].Is_clean == 1)
+                ++repeat;
+            array[target].Is_clean = 1;
+        }
+
+        for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
+            if (array[parent].Is_clean == 1)
+                ++repeat;
+            array[parent].Is_clean = 1;
+            fout << parent / col<< ' '<<parent % col << '\n';
+            parent = predecessor[parent];
+            --energy;
+            ++step;
+        }
+    }
+    fout << "number of step is " << step << '\n';
+    fout << "number of repeated step is " << repeat << '\n';
+    fout << "And the percentage is " << (float) repeat / step << '\n';
+}
 
 void graph::check_clean(void)
 {
     for (int i = 0 ; i < num_node; i++)
         if (array[i].Is_clean == 0 && array[i].type != '1') {
             fout << i / col << ' ' << i % col << '\n';
-            return;
         }
     fout << "Success" << endl;
 }
@@ -368,10 +381,9 @@ int main(void)
     //mygraph.print_BFS();
  
     //mygraph.print_neighbor();
-
+    
     mygraph.clean();
-
-    //mygraph.check_clean();
+    mygraph.check_clean();
     fout.close();
     cout << (long double)(clock() - begin) / CLOCKS_PER_SEC << endl;
 
