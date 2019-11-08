@@ -48,6 +48,7 @@ private:
 
 class graph {
 private:
+    int repeat;
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
     int R_position; // the position of the recharge station
@@ -82,6 +83,7 @@ public:
         }
     }
     int furthest_neighbor(const int&);
+    void check_clean(void);
 };
 
 graph:: ~graph(void)
@@ -158,6 +160,7 @@ graph:: graph(void)
     capacity = 0;
     heapsize = 0;
     step = 0;
+    repeat = 0;
     heap_set();
 }
 
@@ -314,10 +317,13 @@ void graph:: clean(void)
     
     while (!heap_IsEmpty()) {
         energy = total_energy; // charge
+        heap_clean();
         target = heap_top(); // get the index of the furthest node
         fout << R_position / col <<' ' <<R_position % col << '\n';
         for (int i = 0, parent = target; i < distance[target]; i++) {
             s.push(parent);
+            if (array[parent].Is_clean == 1)
+                ++repeat;
             array[parent].Is_clean = 1;
             parent = predecessor[parent];
         }
@@ -336,19 +342,33 @@ void graph:: clean(void)
             fout << target / col <<' '<< target % col <<'\n';
             --energy;
             ++step;
+            if (array[target].Is_clean == 1)
+                ++repeat;
             array[target].Is_clean = 1;
         }
 
         for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
+            if (array[parent].Is_clean == 1)
+                ++repeat;
             array[parent].Is_clean = 1;
             fout << parent / col<< ' '<<parent % col << '\n';
             parent = predecessor[parent];
             --energy;
             ++step;
         }
-        heap_clean();
     }
     fout << "number of step is " << step << '\n';
+    fout << "number of repeated step is " << repeat << '\n';
+    fout << "And the percentage is " << (float) repeat / step << '\n';
+}
+
+void graph::check_clean(void)
+{
+    for (int i = 0 ; i < num_node; i++)
+        if (array[i].Is_clean == 0 && array[i].type != '1') {
+            fout << i / col << ' ' << i % col << '\n';
+        }
+    fout << "Success" << endl;
 }
 int main(void)
 {
@@ -363,8 +383,9 @@ int main(void)
     //mygraph.print_neighbor();
     
     mygraph.clean();
+    mygraph.check_clean();
     fout.close();
-    cout << (double)(clock() - begin) / CLOCKS_PER_SEC << endl;
+    cout << (long double)(clock() - begin) / CLOCKS_PER_SEC << endl;
 
     return 0;
 }
