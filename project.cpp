@@ -51,13 +51,14 @@ private:
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
     int R_position; // the position of the recharge station
-    int battery; // the volume of battery
+    int total_energy; // the volume of battery
     node* array; // the two-dimensional array to represent the graph
     int *predecessor; // the predecessor array as a result of BFS
     int *distance; // the closest distance from any node to the R
     mynamespace::pair* heap;
     int heapsize;
     int capacity;
+    int step;
 public:
     graph(void); // constructor
     ~graph(void);
@@ -80,7 +81,7 @@ public:
             fout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
         }
     }
-    int furthest_neighbor(int);
+    int furthest_neighbor(const int&);
 };
 
 graph:: ~graph(void)
@@ -97,7 +98,7 @@ graph:: graph(void)
     char **temp, *temp1;
     
     fin.open("aaa.data", ios::in);
-    fin >> row >> col >> battery;
+    fin >> row >> col >> total_energy;
     
     num_node = col * row;
     
@@ -156,6 +157,7 @@ graph:: graph(void)
     heap = NULL;
     capacity = 0;
     heapsize = 0;
+    step = 0;
     heap_set();
 }
 
@@ -274,7 +276,7 @@ void graph::heap_clean(void)
     }
 }
 
-int graph::furthest_neighbor(int x) 
+int graph::furthest_neighbor(const int &x) 
 {
     int furthest = 0;
     int furthest_distance = 0;
@@ -306,49 +308,47 @@ void graph:: clean(void)
     int target;
     int parent;
     stack<int> s;
-    int current_battery;
+    int energy;
 
     array[R_position].Is_clean = 1;
     
     while (!heap_IsEmpty()) {
-        current_battery = battery; // charge
+        energy = total_energy; // charge
         target = heap_top(); // get the index of the furthest node
-        fout << R_position << endl;
-        fout << "there are still " << current_battery << " of battery" << endl;
-        //fout << "target is " << target << " and distance is " << distance[target] << endl;
+        fout << R_position / col <<' ' <<R_position % col << '\n';
         for (int i = 0, parent = target; i < distance[target]; i++) {
             s.push(parent);
             array[parent].Is_clean = 1;
             parent = predecessor[parent];
         }
+        step += distance[target];
+        energy -= distance[target];
+
         while (!s.empty()) {
-            fout << s.top() << endl;
-            current_battery--;
-            fout << "there are still " << current_battery << " of battery" << endl;
+            fout << s.top() / col<<' ' <<s.top() % col <<'\n';
             s.pop();
         }
-        fout << "reacing target, the current battery is " << current_battery << endl;
-
         
-        while (current_battery > distance[target] && !heap_IsEmpty()) {
+        while (energy > distance[target] && !heap_IsEmpty()) {
             heap_clean();
             target = furthest_neighbor(target);
             if (target == R_position) break; // occasioncally go to home
-            fout << target << endl;
-            --current_battery;
-            fout << "there are still " << current_battery << " of battery" << endl;
+            fout << target / col <<' '<< target % col <<'\n';
+            --energy;
+            ++step;
             array[target].Is_clean = 1;
         }
 
         for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
             array[parent].Is_clean = 1;
-            fout << parent << endl;
+            fout << parent / col<< ' '<<parent % col << '\n';
             parent = predecessor[parent];
-            --current_battery;
-            fout << "there are still " << current_battery << " of battery" << endl;
+            --energy;
+            ++step;
         }
         heap_clean();
     }
+    fout << "number of step is " << step << '\n';
 }
 int main(void)
 {
@@ -356,15 +356,15 @@ int main(void)
     graph mygraph;
 
     fout.open("output.path", ios::out);
-    mygraph.heap_print();
-    fout << endl;
+    //mygraph.heap_print();
+    //fout << endl;
     //mygraph.print_BFS();
-    fout << endl;
+ 
     //mygraph.print_neighbor();
-    fout << endl;
-    //mygraph.clean();
+    
+    mygraph.clean();
     fout.close();
     cout << (double)(clock() - begin) / CLOCKS_PER_SEC << endl;
-    
+
     return 0;
 }
