@@ -99,7 +99,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("floor.data", ios::in);
+    fin.open("thousand.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
@@ -281,7 +281,7 @@ void graph::heap_clean(void)
 
 int graph::furthest_neighbor(const int &x) 
 {
-    int furthest = 0;
+    int furthest = -1;
     int furthest_distance = 0;
 
     // find the most dirty and furthest first, if can't find any, then go to the furthest
@@ -293,16 +293,8 @@ int graph::furthest_neighbor(const int &x)
             furthest_distance = distance[furthest];
         }
     }
-    if (furthest == 0) {
-        for (int i = 0; i < 4; i++) {
-            if (array[x].neighbor[i] != -1 &&
-                furthest_distance < distance[array[x].neighbor[i]]) {
-                furthest = array[x].neighbor[i];
-                furthest_distance = distance[furthest];
-            }
-        }
-        return furthest;                
-    }
+    if (furthest == -1)  // the neighbors are either visted or wall
+        return predecessor[x];                
     return furthest;
 }
 
@@ -350,7 +342,7 @@ void graph:: clean(void)
                 ++foo;
             }
             array[target].Is_clean = 1;
-            
+
             // avoid to make circle
             if (more > num_node / 16  && (float)foo / more > 0.6)
                 break;
