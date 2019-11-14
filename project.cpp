@@ -91,7 +91,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("aaa.data", ios::in);
+    fin.open("floor.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
