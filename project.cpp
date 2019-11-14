@@ -59,14 +59,12 @@ private:
     Pair* heap;
     int heapsize;
     int capacity;
-    int step;
+    int total_step;
 public:
     graph(void); // constructor
     ~graph(void);
     void clean(void); // to print the path of clean
     void set_BFS(void);
-    void print_BFS(void);
-    void print_neighbor(void);
     void heap_clean(void);
     bool heap_IsEmpty(void) {
         return (heapsize == 0);
@@ -77,11 +75,6 @@ public:
     void heap_push(const Pair&);
     void heap_pop(void);
     void heap_set(void);
-    void heap_print(void) {
-        for (int i = 1; i <= heapsize; i++) {
-            fout <<"index is  " << heap[i].x << " distance is " << heap[i].y << endl;
-        }
-    }
     int furthest_neighbor(const int&);
     void check_clean(void);
 };
@@ -99,7 +92,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("thousand.data", ios::in);
+    fin.open("floor.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
@@ -155,11 +148,10 @@ graph:: graph(void)
         }
     }
     set_BFS();
-
     heap = NULL;
     capacity = 0;
     heapsize = 0;
-    step = 0;
+    total_step = 0;
     repeat = 0;
     heap_set();
 }
@@ -201,31 +193,6 @@ void graph::set_BFS(void)
     }
     delete [] colour;
 }
-
-void graph:: print_BFS(void) 
-{
-    for (int i = 0; i < num_node; i++) {
-        if (array[i].type != '1') {
-            fout << i << "th vertex has distance "<< distance[i];
-            fout << ", and it's predecessor is " << predecessor[i] << endl;
-        }
-    }
-}
-
-void graph:: print_neighbor(void)
-{
-    
-    for (int i = 0; i < num_node; i++) {
-        if (array[i].type != '1')
-            fout << i << endl;
-        for (int j = 0; j < 4; j++)
-            if (array[i].type != '1') {
-             fout << array[i].neighbor[j] << ' ';
-            }
-        if (array[i].type != '1')  fout << endl;
-    }
-}
-
 
 void graph::heap_set(void) {
     heap = new Pair[num_node + 1];
@@ -292,6 +259,8 @@ int graph::furthest_neighbor(const int &x)
             furthest = array[x].neighbor[i];
             furthest_distance = distance[furthest];
         }
+        else if (array[x].neighbor[i] == R_position)
+            return R_position;
     }
     if (furthest == -1)  // the neighbors are either visted or wall
         return predecessor[x];                
@@ -300,75 +269,78 @@ int graph::furthest_neighbor(const int &x)
 
 void graph:: clean(void)
 {
-    int target;
-    int parent;
+    int j, k;
     Stack s;
     int energy;
     int foo, more;
     array[R_position].Is_clean = 1;
+    fout << R_position / col <<' ' <<R_position % col << '\n';
     
     while (!heap_IsEmpty()) {
         energy = total_energy; // charge
         heap_clean();
-        target = heap_top(); // get the index of the furthest node
-        fout << R_position / col <<' ' <<R_position % col << '\n';
-        for (int i = 0, parent = target; i < distance[target]; i++) {
-            s.push(parent);
-            if (array[parent].Is_clean == 1)
+        j = heap_top(); // get the index of the furthest node    
+        fout << energy << '\n';
+
+        for (int i = 0, k = j; i < distance[j]; i++) {
+            s.push(k);
+            if (array[k].Is_clean == 1)
                 ++repeat;
-            array[parent].Is_clean = 1;
-            parent = predecessor[parent];
+            array[k].Is_clean = 1;
+            k = predecessor[k];
         }
-        step += distance[target];
-        energy -= distance[target];
+        total_step += distance[j];
+        //energy -= distance[j];
 
         while (!s.IsEmpty()) {
             fout << s.front() / col<<' ' <<s.front() % col <<'\n';
+            --energy;
+            fout << energy << '\n';
             s.pop();
         }
         
         more = foo = 0;
-        while (energy > distance[target] && !heap_IsEmpty()) {
+        while (energy > distance[j] && !heap_IsEmpty()) {
             heap_clean();
-            target = furthest_neighbor(target);
+            j = furthest_neighbor(j);
         
-            if (target == R_position) break; // occasioncally go to home
-            fout << target / col <<' '<< target % col <<'\n';
-            --energy;
-            ++step;
+            if (j == R_position) break; // occasioncally go to home
+            fout << j / col <<' '<< j % col <<'\n';
+            fout << --energy << '\n';
+            ++total_step;
             ++more;
-            if (array[target].Is_clean == 1) {
+            if (array[j].Is_clean == 1) {
                 ++repeat;
                 ++foo;
             }
-            array[target].Is_clean = 1;
+            array[j].Is_clean = 1;
 
             // avoid to make circle
             if (more > num_node / 16  && (float)foo / more > 0.6)
                 break;
         }
-
-        for (int i = 0, parent = predecessor[target]; i < distance[target]; i++) {
-            if (array[parent].Is_clean == 1)
+        fout << "DDDDDDDXXXX" << energy << ' '<< distance[j] << '\n';
+        for (int i = 0, k = predecessor[j]; i < distance[j]; i++) {
+            if (array[k].Is_clean == 1)
                 ++repeat;
-            array[parent].Is_clean = 1;
-            fout << parent / col<< ' ' << parent % col << '\n';
-            parent = predecessor[parent];
-            --energy;
-            ++step;
+            array[k].Is_clean = 1;
+            fout << k / col<< ' ' << k % col << '\n';
+            fout << --energy << '\n';
+            k = predecessor[k];
+            ++total_step;
         }
     }
-    fout << "number of step is " << step << '\n';
+    fout << "number of total_step is " << total_step << '\n';
     fout << "number of repeated step is " << repeat << '\n';
-    fout << "And the percentage is " << (float) repeat / step << '\n';
+    fout << "And the percentage is " << (float) repeat / total_step << '\n';
 }
 
 void graph::check_clean(void)
 {
     for (int i = 0 ; i < num_node; i++)
-        if (array[i].Is_clean == 0 && array[i].type != '1') {
+        if (array[i].Is_clean == 0 && array[i].type != '1') 
             fout << i / col << ' ' << i % col << '\n';
-        }
+        
     fout << "Success" << endl;
 }
 
@@ -377,13 +349,8 @@ int main(void)
     clock_t begin = clock();
     graph mygraph;
 
-    fout.open("output.path", ios::out);
-    //mygraph.heap_print();
-    //fout << endl;
-    //mygraph.print_BFS();
- 
-    //mygraph.print_neighbor();
-    
+    fout.open("final.path", ios::out);
+
     mygraph.clean();
     mygraph.check_clean();
     fout.close();
