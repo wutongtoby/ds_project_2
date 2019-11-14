@@ -76,7 +76,6 @@ public:
     void heap_pop(void);
     void heap_set(void);
     int furthest_neighbor(const int&);
-    void check_clean(void);
 };
 
 graph:: ~graph(void)
@@ -92,7 +91,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("floor.data", ios::in);
+    fin.open("aaa.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
@@ -280,7 +279,6 @@ void graph:: clean(void)
         energy = total_energy; // charge
         heap_clean();
         j = heap_top(); // get the index of the furthest node    
-        fout << energy << '\n';
 
         for (int i = 0, k = j; i < distance[j]; i++) {
             s.push(k);
@@ -290,12 +288,10 @@ void graph:: clean(void)
             k = predecessor[k];
         }
         total_step += distance[j];
-        //energy -= distance[j];
+        energy -= distance[j];
 
         while (!s.IsEmpty()) {
             fout << s.front() / col<<' ' <<s.front() % col <<'\n';
-            --energy;
-            fout << energy << '\n';
             s.pop();
         }
         
@@ -306,7 +302,7 @@ void graph:: clean(void)
         
             if (j == R_position) break; // occasioncally go to home
             fout << j / col <<' '<< j % col <<'\n';
-            fout << --energy << '\n';
+            --energy;
             ++total_step;
             ++more;
             if (array[j].Is_clean == 1) {
@@ -319,42 +315,26 @@ void graph:: clean(void)
             if (more > num_node / 16  && (float)foo / more > 0.6)
                 break;
         }
-        fout << "DDDDDDDXXXX" << energy << ' '<< distance[j] << '\n';
         for (int i = 0, k = predecessor[j]; i < distance[j]; i++) {
             if (array[k].Is_clean == 1)
                 ++repeat;
             array[k].Is_clean = 1;
             fout << k / col<< ' ' << k % col << '\n';
-            fout << --energy << '\n';
+            --energy ;
             k = predecessor[k];
             ++total_step;
         }
     }
-    fout << "number of total_step is " << total_step << '\n';
-    fout << "number of repeated step is " << repeat << '\n';
-    fout << "And the percentage is " << (float) repeat / total_step << '\n';
-}
-
-void graph::check_clean(void)
-{
-    for (int i = 0 ; i < num_node; i++)
-        if (array[i].Is_clean == 0 && array[i].type != '1') 
-            fout << i / col << ' ' << i % col << '\n';
-        
-    fout << "Success" << endl;
+    cout << total_step << '\n';
 }
 
 int main(void)
 {
-    clock_t begin = clock();
     graph mygraph;
-
     fout.open("final.path", ios::out);
-
+    
     mygraph.clean();
-    mygraph.check_clean();
+    
     fout.close();
-    cout << (long double)(clock() - begin) / CLOCKS_PER_SEC << endl;
-
     return 0;
 }
