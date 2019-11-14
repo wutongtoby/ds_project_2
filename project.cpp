@@ -273,6 +273,7 @@ void graph:: clean(void)
     int energy;
     int foo, more;
     array[R_position].Is_clean = 1;
+    fout << "                                                           " << '\n';
     fout << R_position / col <<' ' <<R_position % col << '\n';
     
     while (!heap_IsEmpty()) {
@@ -325,7 +326,8 @@ void graph:: clean(void)
             ++total_step;
         }
     }
-    cout << total_step << '\n';
+    fout.seekp(0L, ios::beg);
+    fout << total_step;
 }
 
 int main(void)
