@@ -48,7 +48,6 @@ private:
 
 class graph {
 private:
-    int repeat;
     int num_node; // total number of 0 node in the graph
     int col, row; // the col, row of the graph
     int R_position; // the position of the recharge station
@@ -151,7 +150,6 @@ graph:: graph(void)
     capacity = 0;
     heapsize = 0;
     total_step = 0;
-    repeat = 0;
     heap_set();
 }
 
@@ -283,8 +281,6 @@ void graph:: clean(void)
 
         for (int i = 0, k = j; i < distance[j]; i++) {
             s.push(k);
-            if (array[k].Is_clean == 1)
-                ++repeat;
             array[k].Is_clean = 1;
             k = predecessor[k];
         }
@@ -307,7 +303,6 @@ void graph:: clean(void)
             ++total_step;
             ++more;
             if (array[j].Is_clean == 1) {
-                ++repeat;
                 ++foo;
             }
             array[j].Is_clean = 1;
@@ -317,8 +312,6 @@ void graph:: clean(void)
                 break;
         }
         for (int i = 0, k = predecessor[j]; i < distance[j]; i++) {
-            if (array[k].Is_clean == 1)
-                ++repeat;
             array[k].Is_clean = 1;
             fout << k / col<< ' ' << k % col << '\n';
             --energy ;
