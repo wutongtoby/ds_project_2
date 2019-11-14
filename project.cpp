@@ -90,7 +90,7 @@ graph:: graph(void)
     fstream fin;
     char **temp, *temp1;
     
-    fin.open("floor.data", ios::in);
+    fin.open("aaa.data", ios::in);
     fin >> row >> col >> total_energy;
     
     num_node = col * row;
@@ -297,7 +297,10 @@ void graph:: clean(void)
             heap_clean();
             j = furthest_neighbor(j);
         
-            if (j == R_position) break; // occasioncally go to home
+            if (j == R_position) {
+                fout << R_position / col <<' ' <<R_position % col << '\n';
+                break;
+            } // occasioncally go to home
             fout << j / col <<' '<< j % col <<'\n';
             --energy;
             ++total_step;
