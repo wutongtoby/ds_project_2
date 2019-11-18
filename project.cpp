@@ -299,6 +299,7 @@ void graph:: clean(void)
         
             if (j == R_position) {
                 fout << R_position / col <<' ' <<R_position % col << '\n';
+                ++total_step;
                 break;
             } // occasioncally go to home
             fout << j / col <<' '<< j % col <<'\n';
