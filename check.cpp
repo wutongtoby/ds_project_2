@@ -64,10 +64,7 @@ int main(void)
         now_position_col = next_position_col;
         temp[now_position_row][now_position_col] = clean;
     }
-    if (now_position_row == R_row && now_position_col == R_col) {
-        cout << "go back to the right way" << endl;
-    }
-    else {
+    if (now_position_row == R_row && now_position_col != R_col) {
         cout << "did'nt go home" << endl;
         cout << now_position_row << ' ' << now_position_col << endl;
     }
