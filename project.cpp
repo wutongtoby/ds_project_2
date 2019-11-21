@@ -13,7 +13,6 @@ const char XD[100] = "floor.data";
 #define grey 1
 #define black 2
 
-#define ISclean '8'
 using namespace std;
 
 fstream fout;
@@ -317,79 +316,6 @@ int main(void)
     
     mygraph.clean();
     fout.close();
-    
-//////////////////////////////////////////////////////
 
-    int num_step;
-    int row, col, total_energy;
-    int now_energy;
-    int now_position_row, now_position_col;
-    int next_position_row, next_position_col;
-    int R_col, R_row;
-    char *temp1;
-
-    fstream path, map;
-    path.open("final.path", ios::in);
-    map.open(XD, ios::in);
-    
-    map >> row >> col >> total_energy;
-    
-    temp1 = new char[row * col + 1];
-    
-    for (int i = 0; i < row; i++) {
-        map >> temp1 + i * col;
-    }
-    map.close();
-
-    path >> num_step;
-    path >> now_position_row >> now_position_col;
-    if (temp1[now_position_row * col + now_position_col] != 'R') {
-        cout << "fail since the R_position is wrong" << '\n';
-        return -1;
-    }
-    R_row = now_position_row, R_col = now_position_col; 
-
-    for (int i = 0, now_energy = total_energy; i < num_step; i++) {
-        if (now_position_row == R_row && now_position_col == R_col)
-            now_energy = total_energy;
-        path >> next_position_row >> next_position_col;
-        if ((next_position_col - now_position_col) * (next_position_col - now_position_col) +
-            (next_position_row - now_position_row) * (next_position_row - now_position_row) != 1) {
-            cout << "fail since jumping from some step" << '\n';
-            cout << now_position_row << ' '<<now_position_col <<'\n';
-            cout << i << '\n';
-            return -1;
-        }
-        if (temp1[now_position_row * col + now_position_col] == '1') {
-            cout << "fail since walk into wall" << '\n';
-            return -1;       
-        }
-        now_energy--;
-        if (now_energy < 0) {
-            cout << "fail since energy is used out" << '\n';
-            cout << next_position_row << ' ' << next_position_col << '\n';
-            cout << i << '\n';
-            cout << now_energy << '\n';
-            return -1;
-        }
-        now_position_row = next_position_row;
-        now_position_col = next_position_col;
-        temp1[now_position_row * col + now_position_col] = ISclean;
-    }
-    path.close();
-    if (now_position_row == R_row && now_position_col != R_col) {
-        cout << "did'nt go home" << '\n';
-        cout << now_position_row << ' ' << now_position_col << '\n';
-    }
-    for (int i = 0; i < row * col; i++) {
-        if (temp1[now_position_row * col + now_position_col] == '0') {
-            cout << "not all clean" << '\n';
-            return -1;
-        }
-    }
-    cout << "success" << '\n'; 
-    delete[] temp1;
-   
-    
     return 0;
 }
