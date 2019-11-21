@@ -3,9 +3,8 @@
 #include <time.h>
 #include "stack.h"
 #include "queue.h"
-#include <string.h>
-#include <string>
 
+const char XD[100] = "D:/code/project_2/floor.data";
 #define up 0
 #define down 1
 #define left 2
@@ -62,7 +61,7 @@ private:
     int capacity;
     int total_step;
 public:
-    void set_graph(string);
+    graph(void); // constructor
     ~graph(void);
     void clean(void); // to print the path of clean
     void set_BFS(void);
@@ -87,15 +86,14 @@ graph:: ~graph(void)
     delete[] heap;
 }
 
-void graph:: set_graph(string a)
+graph:: graph(void)
 {
     fstream fin;
     char **temp, *temp1;
-   
-    fin.open(a , ios::in);
+    
+    fin.open(XD, ios::in);
     fin >> row >> col >> total_energy;
     
-     
     num_node = col * row;
     
     temp1 = new char[num_node + 1];
@@ -133,9 +131,9 @@ void graph:: set_graph(string a)
             else if (i / col == row - 1) // R is at the bottom of the graph
                 array[i].neighbor[up] = i - col;
             else if (i % col == 0) // R is at the left wall
-                array[i].neighbor[right] = i - 1;
+                array[i].neighbor[right] = i + 1;
             else if (i % col == col - 1) // R is at the right wall
-                array[i].neighbor[left] = i + 1;
+                array[i].neighbor[left] = i - 1;
             else {
                 if (array[i - col].type != '1') 
                     array[i].neighbor[up] = i - col;
@@ -269,7 +267,7 @@ int graph::furthest_neighbor(const int &x)
 
 void graph:: clean(void)
 {
-    int j;
+    int j, k;
     Stack s;
     int energy;
     int foo, more;
@@ -296,10 +294,9 @@ void graph:: clean(void)
         }
         
         more = foo = 0;
-        while (energy > distance[j] && !heap_IsEmpty()) {
+        while (energy > distance[furthest_neighbor(j)] && !heap_IsEmpty()) {
             heap_clean();
             j = furthest_neighbor(j);
-        
             if (j == R_position) {
                 fout << R_position / col <<' ' <<R_position % col << '\n';
                 ++total_step;
@@ -333,26 +330,15 @@ void graph:: clean(void)
 int main(void)
 {
     graph mygraph;
-    fstream fin;
-    //fstream cout;
-    string a;
-    int count = 0;
-    //cout.open("report.data", ios::out);
-    fin.open("D:\\code\\project_2\\source.txt");
-    while(++count < 70) {
-    fin >> a;
-    
-    mygraph.set_graph(a);
-    
-       
     fout.open("final.path", ios::out);
     
     mygraph.clean();
     
-    //cout.close();
-    
+    fout.close();
+///////////////////////////////////////////////////////
     int num_step;
     int row, col, total_energy;
+    int now_energy;
     int now_position_row, now_position_col;
     int next_position_row, next_position_col;
     int R_col, R_row;
@@ -361,7 +347,7 @@ int main(void)
 
     fstream path, map;
     path.open("final.path", ios::in);
-    map.open(a , ios::in);
+    map.open(XD, ios::in);
     
     map >> row >> col >> total_energy;
     
@@ -378,7 +364,7 @@ int main(void)
     path >> now_position_row >> now_position_col;
     if (temp[now_position_row][now_position_col] != 'R') {
         cout << "fail since the R_position is wrong" << endl;
-        cout << a << endl;
+        return -1;
     }
     R_row = now_position_row, R_col = now_position_col; 
     //cout << "R_position " << now_position_row << ' ' << now_position_col << endl;
@@ -390,13 +376,13 @@ int main(void)
         if ((next_position_col - now_position_col) * (next_position_col - now_position_col) +
             (next_position_row - now_position_row) * (next_position_row - now_position_row) != 1) {
             cout << "fail since jumping from some step" << endl;
-            cout << a << endl;
-            continue;
+            cout << now_position_row << ' '<<now_position_col <<endl;
+            cout << i << endl;
+            return -1;
         }
         if (temp[next_position_row][next_position_col] == '1') {
             cout << "fail since walk into wall" << endl;
-            cout << a << endl;  
-            continue;   
+            return -1;       
         }
         now_energy--;
         if (now_energy < 0) {
@@ -404,33 +390,26 @@ int main(void)
             cout << next_position_row << ' ' << next_position_col << endl;
             cout << i << endl;
             cout << now_energy << endl;
-            cout << a << endl;
-            continue;
+            return -1;
         }
         now_position_row = next_position_row;
         now_position_col = next_position_col;
         temp[now_position_row][now_position_col] = ISclean;
     }
-    path.close();
+    //path.close();
     if (now_position_row == R_row && now_position_col != R_col) {
         cout << "did'nt go home" << endl;
         cout << now_position_row << ' ' << now_position_col << endl;
-        cout << a << endl;
-        continue;
     }
     for (int i = 0; i < row * col; i++) {
         if (temp[i / col][i % col] == '0') {
             cout << "not all clean" << endl;
-            cout << a << endl;
-            continue;
+            return -1;
         }
     }
-    cout<< "sucess" << endl;
-    delete[] temp1;
-    delete[] temp;
+    cout << "success" << endl; 
+    //delete[] temp1;
+    //delete[] temp;  
     
-    }
-    fin.close();
-    //cout.close();
     return 0;
 }
