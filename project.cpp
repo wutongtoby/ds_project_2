@@ -4,7 +4,7 @@
 #include "stack.h"
 #include "queue.h"
 
-const char XD[100] = "D:/code/project_2/testcase/107061220_Testcase/floor.data";
+const char XD[100] = "floor.data";
 #define up 0
 #define down 1
 #define left 2
@@ -95,10 +95,9 @@ graph:: graph(void): heap(NULL), capacity(0), heapsize(0), total_step(0)
     
     fin.open(XD, ios::in);
     fin >> row >> col >> total_energy;
-    
     num_node = col * row;
     
-    temp_map = new char[num_node];
+    temp_map = new char[num_node + 1];
     
     array = new node[num_node];
     predecessor = new int[num_node];
@@ -121,9 +120,10 @@ graph:: graph(void): heap(NULL), capacity(0), heapsize(0), total_step(0)
         array[i].neighbor[right] = -1;
     }
     fin.close();
+
     delete [] temp_map;
-    
     // set the neighbor data
+    
     for (int i = 0; i < num_node; i++) {
         if (array[i].type != '1') {
             if (i / col == 0) // R is at the top of the graph
@@ -146,6 +146,7 @@ graph:: graph(void): heap(NULL), capacity(0), heapsize(0), total_step(0)
             }
         }
     }
+   
     set_BFS();
     heap_set();
 }
@@ -315,9 +316,10 @@ int main(void)
     fout.open("final.path", ios::out);
     
     mygraph.clean();
-    
     fout.close();
-///////////////////////////////////////////////////////
+    
+//////////////////////////////////////////////////////
+
     int num_step;
     int row, col, total_energy;
     int now_energy;
@@ -332,7 +334,7 @@ int main(void)
     
     map >> row >> col >> total_energy;
     
-    temp1 = new char[row * col];
+    temp1 = new char[row * col + 1];
     
     for (int i = 0; i < row; i++) {
         map >> temp1 + i * col;
@@ -342,7 +344,7 @@ int main(void)
     path >> num_step;
     path >> now_position_row >> now_position_col;
     if (temp1[now_position_row * col + now_position_col] != 'R') {
-        cout << "fail since the R_position is wrong" << endl;
+        cout << "fail since the R_position is wrong" << '\n';
         return -1;
     }
     R_row = now_position_row, R_col = now_position_col; 
@@ -353,21 +355,21 @@ int main(void)
         path >> next_position_row >> next_position_col;
         if ((next_position_col - now_position_col) * (next_position_col - now_position_col) +
             (next_position_row - now_position_row) * (next_position_row - now_position_row) != 1) {
-            cout << "fail since jumping from some step" << endl;
-            cout << now_position_row << ' '<<now_position_col <<endl;
-            cout << i << endl;
+            cout << "fail since jumping from some step" << '\n';
+            cout << now_position_row << ' '<<now_position_col <<'\n';
+            cout << i << '\n';
             return -1;
         }
         if (temp1[now_position_row * col + now_position_col] == '1') {
-            cout << "fail since walk into wall" << endl;
+            cout << "fail since walk into wall" << '\n';
             return -1;       
         }
         now_energy--;
         if (now_energy < 0) {
-            cout << "fail since energy is used out" << endl;
-            cout << next_position_row << ' ' << next_position_col << endl;
-            cout << i << endl;
-            cout << now_energy << endl;
+            cout << "fail since energy is used out" << '\n';
+            cout << next_position_row << ' ' << next_position_col << '\n';
+            cout << i << '\n';
+            cout << now_energy << '\n';
             return -1;
         }
         now_position_row = next_position_row;
@@ -376,18 +378,18 @@ int main(void)
     }
     path.close();
     if (now_position_row == R_row && now_position_col != R_col) {
-        cout << "did'nt go home" << endl;
-        cout << now_position_row << ' ' << now_position_col << endl;
+        cout << "did'nt go home" << '\n';
+        cout << now_position_row << ' ' << now_position_col << '\n';
     }
     for (int i = 0; i < row * col; i++) {
         if (temp1[now_position_row * col + now_position_col] == '0') {
-            cout << "not all clean" << endl;
+            cout << "not all clean" << '\n';
             return -1;
         }
     }
-    cout << "success" << endl; 
+    cout << "success" << '\n'; 
     delete[] temp1;
-      
+   
     
     return 0;
 }
